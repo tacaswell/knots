@@ -1,14 +1,17 @@
 [project]
 authors = [{name = "Thomas A Caswell", email = "tcaswell@gmail.com"}]
-dependencies = []
 description = "Add a short description here"
 name = "knots"
 requires-python = ">= 3.12"
 version = "0.1.0"
+dependencies = ["mpl-gui @ git+https://github.com/matplotlib/mpl-gui"]
 
 [build-system]
 build-backend = "hatchling.build"
 requires = ["hatchling"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.pixi.project]
 channels = ["conda-forge"]
