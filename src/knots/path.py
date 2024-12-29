@@ -130,7 +130,7 @@ def as_mask(knot: Knot, width: float, *, dpi=200):
     ax.add_artist(make_artist(knot.path, color="k", lw=width))
     canvas.draw()
 
-    return np.asarray(canvas.buffer_rgba()).mean(axis=2)
+    return np.asarray(canvas.buffer_rgba())[:, :, :3].mean(axis=2)
 
 
 def as_outline(knot: Knot, width: float = 7, *, thresh=128):
