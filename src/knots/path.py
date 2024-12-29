@@ -1,5 +1,5 @@
 from collections import namedtuple
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import cast
 
 import numpy as np
@@ -22,15 +22,16 @@ def make_artist(path: Path, *, color, **kwargs):
 
 @dataclass
 class Knot:
-    path: Path
-    base_path: Path | None = None
+    path: Path = field(repr=False)
+    base_path: Path | None = field(repr=False, default=None)
+    description: str = ""
 
     @classmethod
-    def four_fold(cls, path_data: list[tuple[int, float]]):
+    def four_fold(cls, path_data: list[tuple[int, float]], description: str = ""):
         codes, verts = zip(*path_data, strict=True)
         base_path = Path(verts, codes, closed=True)
         path = four_fold(base_path)
-        return cls(path, base_path)
+        return cls(path, base_path, description)
 
 
 def join(*paths, close=False):
