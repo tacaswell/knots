@@ -1,6 +1,6 @@
 [project]
 authors = [{name = "Thomas A Caswell", email = "tcaswell@gmail.com"}]
-description = "Add a short description here"
+description = "Helpers to draw Celtic-stlye knots."
 name = "knots"
 requires-python = ">= 3.12"
 version = "0.1.0"
@@ -21,6 +21,7 @@ platforms = ["linux-64"]
 knots = { path = ".", editable = true }
 
 [tool.pixi.tasks]
+gen_readme_images = "python scripts/readme_images.py"
 
 [tool.pixi.dependencies]
 matplotlib = ">=3.10.0,<4"

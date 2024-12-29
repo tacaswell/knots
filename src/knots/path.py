@@ -84,7 +84,6 @@ def gen_curve3(p1: Pt, p2: Pt, scale=0.15):
 def gen_curve4(start_point: Pt, exit_angle: float, scale: float = 0.15):
     last_point = start_point
     next_point, entrance_angle = yield
-    print(f"{exit_angle=} {entrance_angle=}")
     dist = np.hypot(next_point.x - last_point.x, next_point.y - last_point.y)
     c1 = Pt(
         last_point.x + dist * scale * np.cos(exit_angle),
@@ -102,7 +101,6 @@ def gen_curve4(start_point: Pt, exit_angle: float, scale: float = 0.15):
             (Path.CURVE4, c2),
             (Path.CURVE4, next_point),
         ]
-        print(f"{exit_angle=} {entrance_angle=}")
         dist = np.hypot(next_point.x - last_point.x, next_point.y - last_point.y)
         c1 = Pt(
             last_point.x + dist * scale * np.cos(exit_angle),
@@ -116,7 +114,9 @@ def gen_curve4(start_point: Pt, exit_angle: float, scale: float = 0.15):
         exit_angle = entrance_angle
 
 
-def as_mask(knot: Knot, *, xlims: float = 1.1, ylims: float = 1.1, dpi=200):
+def as_mask(
+    knot: Knot, width: float, *, xlims: float = 1.1, ylims: float = 1.1, dpi=200
+):
     fig = Figure(dpi=dpi)
     canvas = FigureCanvasAgg(fig)
     ax = fig.add_axes((0, 0, 1, 1))
@@ -124,14 +124,16 @@ def as_mask(knot: Knot, *, xlims: float = 1.1, ylims: float = 1.1, dpi=200):
     ax.set_xlim(-xlims, xlims)
     ax.set_ylim(-ylims, ylims)
 
-    ax.add_artist(make_artist(knot.path, color="k", lw=7))
+    ax.add_artist(make_artist(knot.path, color="k", lw=width))
     canvas.draw()
 
     return np.asarray(canvas.buffer_rgba()).mean(axis=2)
 
 
-def as_outline(knot: Knot, *, xlims: float = 1.1, ylims: float = 1.1, thresh=128):
-    mask = as_mask(knot, xlims=xlims, ylims=ylims, dpi=600)
+def as_outline(
+    knot: Knot, width: float = 7, *, xlims: float = 1.1, ylims: float = 1.1, thresh=128
+):
+    mask = as_mask(knot, width, xlims=xlims, ylims=ylims, dpi=600)
     ny, nx = mask.shape
     gen = contour_generator(
         z=mask,
@@ -139,10 +141,11 @@ def as_outline(knot: Knot, *, xlims: float = 1.1, ylims: float = 1.1, thresh=128
         y=np.linspace(-ylims, ylims, ny),
         line_type=LineType.ChunkCombinedCode,
     )
-    # this is clearer
+    # this is clearer?
     (verts,), (codes,) = cast(
         tuple[list[ArrayLike], list[ArrayLike]],
         gen.lines(thresh),
     )
-    a, b = gen.lines(thresh)
-    return Path(verts, codes)
+    p = Path(verts, codes)
+    p.should_simplify = True
+    return p

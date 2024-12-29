@@ -4,17 +4,35 @@ Based on _Celtic Art: The Methods of Construction_ [^book], which covers how to
 create Celtic-style knot work this code automates the initial steps for basic
 knots.
 
+
 Very briefly, the method is to:
 
 1. construct a single line that is the path of the knot
 2. expand to a ribbon around the center line
-3. interleave the crossings
-4. elaboration
+3. remove the center line
+4. interleave the crossings
+5. elaboration and decoration
 
-Using this code you will be able to generate up to stage 2 that can be printed
+Using this code you will be able to generate up to stage 3 that can be printed
 and traced.
 
+To make this concrete, the initial step is to generate the path of the knot,
+shown here including the control points used for path and indicating the unit
+cell that was mirrored to make the complete knot.
+
+![Stage 1 construction with control points](static/guide.svg)
+
+Dropping the construction marks and showing the center line gives
+
+![Stage 2 construction center line](static/center_line.svg)
+
+and removing the center line gives
+
+![Stage 3 construction ready to be traced](static/stage_3.svg)
+
+At this stage, this is ready to be printed to begin the manual process of
+interleaving the crossings.  Pick any crossing and decide which direction will
+be "over".  You then move either direction along the ribbon alternating
+over/under until you return to the starting point.
 
 [^book]: Bain, George. Celtic Art: The Methods of Construction. Contsable, 1996. ISBN 978-0-09-476900-7
-
-Book Title: Subtitle. Publisher, Year.
