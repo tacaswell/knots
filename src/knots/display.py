@@ -27,8 +27,8 @@ def show_with_guide(
 ) -> Figure:
     fig = Figure(layout="constrained")
     ax = fig.subplots()
-    ax.set_xlim(-1.1, 1.1)
-    ax.set_ylim(-1.1, 1.1)
+    ax.set_xlim(*knot.ylimits)
+    ax.set_ylim(*knot.xlimits)
     ax.set_aspect("equal")
     ax.add_artist(make_artist(knot.path, color="blue", lw=lw, zorder=1))
 
@@ -51,19 +51,19 @@ def generate_stage3(
     *,
     center_line: bool = False,
     fig_size=(8.5, 11),
-    xlims: float = 1.1,
-    ylims: float = 1.1,
 ) -> Figure:
     fig = Figure(figsize=fig_size)
     ax = fig.add_axes((0, 0, 1, 1))
-    ax.set_xlim(-xlims, xlims)
-    ax.set_ylim(-ylims, ylims)
+    ax.set_xlim(*knot.xlimits)
+    ax.set_ylim(*knot.ylimits)
 
     ax.axis("off")
     ax.set_aspect("equal")
     ax.add_artist(
         make_artist(
-            as_outline(knot, width=width, xlims=xlims, ylims=ylims), lw=1, color="k"
+            as_outline(knot, width=width),
+            lw=1,
+            color="k",
         )
     )
     if center_line:

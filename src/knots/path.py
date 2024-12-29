@@ -25,6 +25,8 @@ class Knot:
     path: Path = field(repr=False)
     base_path: Path | None = field(repr=False, default=None)
     description: str = ""
+    xlimits: tuple[float, float] = field(repr=False, default=(-1.1, 1.1))
+    ylimits: tuple[float, float] = field(repr=False, default=(-1.1, 1.1))
 
     @classmethod
     def four_fold(cls, path_data: list[tuple[int, float]], description: str = ""):
@@ -115,15 +117,15 @@ def gen_curve4(start_point: Pt, exit_angle: float, scale: float = 0.15):
         exit_angle = entrance_angle
 
 
-def as_mask(
-    knot: Knot, width: float, *, xlims: float = 1.1, ylims: float = 1.1, dpi=200
-):
-    fig = Figure(dpi=dpi)
+def as_mask(knot: Knot, width: float, *, dpi=200):
+    aspect_ratio = float(np.diff(knot.xlimits) / np.diff(knot.ylimits))
+    fig = Figure(dpi=dpi, figsize=(5, 5 * aspect_ratio))
     canvas = FigureCanvasAgg(fig)
     ax = fig.add_axes((0, 0, 1, 1))
     ax.axis("off")
-    ax.set_xlim(-xlims, xlims)
-    ax.set_ylim(-ylims, ylims)
+    ax.set_aspect("equal")
+    ax.set_xlim(*knot.xlimits)
+    ax.set_ylim(*knot.ylimits)
 
     ax.add_artist(make_artist(knot.path, color="k", lw=width))
     canvas.draw()
@@ -131,15 +133,13 @@ def as_mask(
     return np.asarray(canvas.buffer_rgba()).mean(axis=2)
 
 
-def as_outline(
-    knot: Knot, width: float = 7, *, xlims: float = 1.1, ylims: float = 1.1, thresh=128
-):
-    mask = as_mask(knot, width, xlims=xlims, ylims=ylims, dpi=600)
+def as_outline(knot: Knot, width: float = 7, *, thresh=128):
+    mask = as_mask(knot, width, dpi=600)
     ny, nx = mask.shape
     gen = contour_generator(
         z=mask,
-        x=np.linspace(-xlims, xlims, nx),
-        y=np.linspace(-ylims, ylims, ny),
+        x=np.linspace(*knot.xlimits, nx),
+        y=np.linspace(*knot.ylimits, ny),
         line_type=LineType.ChunkCombinedCode,
     )
     # this is clearer?
