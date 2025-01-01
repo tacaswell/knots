@@ -67,5 +67,5 @@ def generate_stage3(
         )
     )
     if center_line:
-        ax.add_artist(make_artist(knot.path, lw=1, ls="--", color="k"))
+        ax.add_artist(make_artist(knot.path, lw=1, ls="--", color="k", alpha=.1))
     return fig
