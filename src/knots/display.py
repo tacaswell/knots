@@ -27,8 +27,8 @@ def show_with_guide(
 ) -> Figure:
     fig = Figure(layout="constrained")
     ax = fig.subplots()
-    ax.set_xlim(*knot.ylimits)
-    ax.set_ylim(*knot.xlimits)
+    ax.set_xlim(*knot.xlimits)
+    ax.set_ylim(*knot.ylimits)
     ax.set_aspect("equal")
     ax.add_artist(make_artist(knot.path, color="blue", lw=lw, zorder=1))
 
