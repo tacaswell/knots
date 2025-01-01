@@ -1,13 +1,14 @@
 from collections import namedtuple
+from collections.abc import Generator
 from dataclasses import dataclass, field
 from typing import cast
 
 import numpy as np
+import numpy.typing as npt
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.figure import Figure
 from matplotlib.patches import PathPatch
 from matplotlib.path import Path
-from numpy.typing import ArrayLike
 
 from knots.transforms import KnotTransform
 
@@ -29,14 +30,33 @@ class Knot:
     ylimits: tuple[float, float] = field(repr=False, default=(-1.1, 1.1))
 
     @classmethod
-    def four_fold(cls, path_data: list[tuple[int, float]], description: str = ""):
+    def four_fold(cls, path_data: list[tuple[int, float]], **kwargs):
         codes, verts = zip(*path_data, strict=True)
         base_path = Path(verts, codes, closed=True)
         path = four_fold(base_path)
-        return cls(path, base_path, description)
+        return cls(path, base_path, **kwargs)
 
 
-def join(*paths, close=False):
+def join(*paths: Path, close: bool = False) -> Path:
+    """
+    Join N paths together with LINETO.
+
+    This is different from `matplotlib.path.Path.make_compound_path` in
+    that any internal MOVETO are converted to LINETO and there is option to
+    close the result.
+
+    Parameters
+    ----------
+    paths : Path
+       The paths to join
+
+    close : bool, default=False
+        If the final path should be closed
+
+    Returns
+    -------
+    Path
+    """
     pout = Path.make_compound_path(*paths)
     running_total = 0
     for p in paths[:-1]:
@@ -50,21 +70,54 @@ def join(*paths, close=False):
     return pout
 
 
-def reverse(path):
+def reverse(path: Path) -> Path:
+    """
+    Reverse the given Path.
+    """
     verts = path.vertices[::-1]
     codes = np.concat(([Path.MOVETO], path.codes[1:][::-1]))
 
     return Path(verts, codes)
 
 
-def four_fold(path):
+def four_fold(path: Path) -> Path:
+    """
+    Generate a 4-fold symmetric pattern from a Path.
+
+    The initial path will be reflected a across the yaxis and the xaxis.  To
+    look smooth, have the path leave the yaxis horizonatally and approach the
+    xaxis vertically.
+
+    Parameters
+    ----------
+    path : Path
+        The unit cell
+
+    Returns
+    -------
+    Path
+
+    """
     trans = KnotTransform().reflect(0)
     p1 = join(path, reverse(trans.transform_path(path)))
     trans2 = KnotTransform().reflect(np.pi / 2)
     return join(p1, reverse(trans2.transform_path(p1)), close=True)
 
 
-def gen_curve3(p1: Pt, p2: Pt, scale=0.15):
+def gen_curve3(
+    p1: Pt, p2: Pt, scale=0.15
+) -> Generator[list[tuple[np.uint8, Pt]], Pt, None]:
+    """
+    A helper to generate a sequence of quadratic Bezier segments.
+
+    The segments are generated such that the control points and start/end_time
+    point are co-linear.
+
+    The codes yielded are Matplotlib's Path codes.
+
+    This did not do what I wanted and will likely be deleted or re-written.
+
+    """
     next_point = yield [
         (Path.CURVE3, p1),
         (Path.CURVE3, p2),
@@ -84,9 +137,19 @@ def gen_curve3(p1: Pt, p2: Pt, scale=0.15):
         ]
 
 
-def gen_curve4(start_point: Pt, exit_angle: float, scale: float = 0.15):
+def gen_curve4(
+    start_point: Pt, exit_angle: float, scale: float = 0.15
+) -> Generator[list[tuple[np.uint8, Pt]], tuple[Pt, float], None]:
+    """
+    A helper to generate a sequence of quadratic Bezier segments.
+
+    The constraint imposed is that the tangent out of the start of
+    a segment matches the tangent in from the previous.
+
+    The first yield will be an empty list.
+    """
     last_point = start_point
-    next_point, entrance_angle = yield
+    next_point, entrance_angle = yield []
     dist = np.hypot(next_point.x - last_point.x, next_point.y - last_point.y)
     c1 = Pt(
         last_point.x + dist * scale * np.cos(exit_angle),
@@ -117,7 +180,15 @@ def gen_curve4(start_point: Pt, exit_angle: float, scale: float = 0.15):
         exit_angle = entrance_angle
 
 
-def as_mask(knot: Knot, width: float, *, dpi=200):
+def as_mask(knot: Knot, width: float, *, dpi=200) -> npt.NDArray[np.uint8]:
+    """
+    Generate a mask of points "in the ribbon".
+
+    Parameters
+    ----------
+    knot : Knot
+        The knot to generate mask from
+    """
     aspect_ratio = float(np.diff(knot.xlimits) / np.diff(knot.ylimits))
     fig = Figure(dpi=dpi, figsize=(5, 5 * aspect_ratio))
     canvas = FigureCanvasAgg(fig)
@@ -130,10 +201,10 @@ def as_mask(knot: Knot, width: float, *, dpi=200):
     ax.add_artist(make_artist(knot.path, color="k", lw=width))
     canvas.draw()
 
-    return np.asarray(canvas.buffer_rgba())[:, :, :3].mean(axis=2)
+    return np.asarray(canvas.buffer_rgba())[:, :, 0]
 
 
-def as_outline(knot: Knot, width: float = 7, *, thresh=128):
+def as_outline(knot: Knot, width: float = 7, *, thresh=128) -> Path:
     mask = as_mask(knot, width, dpi=600)
     ny, nx = mask.shape
     gen = contour_generator(
@@ -144,7 +215,7 @@ def as_outline(knot: Knot, width: float = 7, *, thresh=128):
     )
     # this is clearer?
     (verts,), (codes,) = cast(
-        tuple[list[ArrayLike], list[ArrayLike]],
+        tuple[list[npt.ArrayLike], list[npt.ArrayLike]],
         gen.lines(thresh),
     )
     p = Path(verts, codes)
