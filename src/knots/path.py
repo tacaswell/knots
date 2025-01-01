@@ -1,5 +1,5 @@
 from collections import namedtuple
-from collections.abc import Generator
+from collections.abc import Generator, Sequence
 from dataclasses import dataclass, field
 from typing import cast
 
@@ -30,9 +30,7 @@ class Knot:
     ylimits: tuple[float, float] = field(repr=False, default=(-1.1, 1.1))
 
     @classmethod
-    def four_fold(cls, path_data: list[tuple[int, float]], **kwargs):
-        codes, verts = zip(*path_data, strict=True)
-        base_path = Path(verts, codes, closed=True)
+    def four_fold(cls, base_path: Path, **kwargs):
         path = four_fold(base_path)
         return cls(path, base_path, **kwargs)
 
@@ -178,6 +176,27 @@ def gen_curve4(
         )
         last_point = next_point
         exit_angle = entrance_angle
+
+
+def path_from_pts(points: Sequence[tuple[Pt, float]], scale=0.3, closed=False) -> Path:
+    itr = iter(points)
+    start_point, start_angle = next(itr)
+    path_data = [(Path.MOVETO, start_point)]
+    gen = gen_curve4(path_data[-1][1], start_angle, scale=scale)
+    # mypy is complaining about the initial send being None
+    gen.send(None)  # type: ignore[arg-type]
+    for pt in itr:
+        path_data.extend(gen.send(pt))
+
+    return path_data_to_path(path_data, closed=closed)
+
+
+def path_data_to_path(path_data: list[tuple[np.uint8, Pt]], closed: bool = False):
+    codes, verts = zip(*path_data, strict=True)
+    if closed:
+        codes += (Path.CLOSEPOLY,)
+        verts += (verts[0],)
+    return Path(verts, codes)
 
 
 def as_mask(knot: Knot, width: float, *, dpi=200) -> npt.NDArray[np.uint8]:
