@@ -42,24 +42,70 @@ def knot1():
     )
 
 
-
-def path2():
-    path_data = [
-        (Path.MOVETO, Pt(0, 0.8)),
-    ]
-    gen = gen_curve4(path_data[-1][1], np.pi, scale=0.3)
-    gen.send(None)
-    for pt in [
-        # (Pt(-0.2, 0.05), np.pi / 5),
-        (Pt(-0.7, 0.5), -np.pi / 5),
-        (Pt(-0.5, 0.1), np.pi / 3),
-        # (Pt(1, -0.15), 0),
-    ]:
-        path_data.extend(gen.send(pt))
-
-    path_data.extend(gen.send((Pt(-0.8, 0), -np.pi / 2)))
-    return path_data
+def band1():
+    return path_from_pts(
+        [
+            (Pt(x, y), angle)
+            for (x, y, angle) in zip(
+                np.arange(-2, 2, 0.1), cycle([-0.55, 0.55]), cycle([0, 0])
+            )
+        ],
+        scale=0.7,
+        closed=False,
+    )
 
 
-k = Knot.four_fold(path1())
+def band2():
+    return path_from_pts(
+        [
+            (Pt(x, y), angle)
+            for (x, y, angle) in zip(
+                np.arange(-2, 2, 0.2), cycle([-0.55, 0.55]), cycle([0, np.pi])
+            )
+        ],
+        scale=0.7,
+        closed=False,
+    )
+
+
+def ring1():
+    r = 0.5
+
+    return path_from_pts(
+        [
+            (Pt(np.cos(th) * (r + dr), np.sin(th) * (r - dr)), (th - np.pi / 2) * phi)
+            for (th, dr, phi) in zip(
+                np.linspace(0, 2 * np.pi, 13), cycle([-0.4, 0.4]), cycle([1, 1])
+            )
+        ],
+        scale=1,
+        closed=True,
+    )
+
+
+def ring2():
+    r = 0.5
+
+    return path_from_pts(
+        [
+            (
+                Pt(np.cos(th) * (r + dr), np.sin(th) * (r + dr)),
+                th + phi,
+            )
+            for (th, dr, phi) in zip(
+                np.linspace(0, 2 * np.pi, 13),
+                cycle([-0.3, 0.3]),
+                cycle([-np.pi / 2, np.pi / 2]),
+            )
+        ],
+        scale=1,
+        closed=True,
+    )
+
+
+# k = Knot(band1(), ylimits=(-0.6, 0.6))
+
+# k = Knot.four_fold(knot1())
+k = Knot(ring2())
 show_with_guide(k)
+fig = generate_stage3(k, center_line=True, width=7)
