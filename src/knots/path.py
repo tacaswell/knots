@@ -189,7 +189,7 @@ def as_mask(knot: Knot, width: float, *, dpi=200) -> npt.NDArray[np.uint8]:
     knot : Knot
         The knot to generate mask from
     """
-    aspect_ratio = float(np.diff(knot.xlimits) / np.diff(knot.ylimits))
+    aspect_ratio = float(np.diff(knot.ylimits) / np.diff(knot.xlimits))
     fig = Figure(dpi=dpi, figsize=(5, 5 * aspect_ratio))
     canvas = FigureCanvasAgg(fig)
     ax = fig.add_axes((0, 0, 1, 1))
@@ -201,7 +201,7 @@ def as_mask(knot: Knot, width: float, *, dpi=200) -> npt.NDArray[np.uint8]:
     ax.add_artist(make_artist(knot.path, color="k", lw=width))
     canvas.draw()
 
-    return np.asarray(canvas.buffer_rgba())[:, :, 0]
+    return np.flipud(np.asarray(canvas.buffer_rgba())[:, :, 0])
 
 
 def as_outline(knot: Knot, width: float = 7, *, thresh=128) -> Path:
