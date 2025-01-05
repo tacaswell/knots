@@ -1,4 +1,5 @@
 import functools
+import os
 
 import numpy as np
 from matplotlib.figure import Figure
@@ -12,9 +13,22 @@ def _auto_display(func):
     # TODO patch the __signature__
     @functools.wraps(func)
     def inner(*args, display: bool = True, **kwargs):
+        display_mode = os.environ.get("KNOT_WINDOW_MODE", "mpl-gui").lower()
+
         fig = func(*args, **kwargs)
         if display:
-            mpl_gui.display(fig)
+            if display_mode == "mpl-gui":
+                mpl_gui.display(fig)
+            elif display_mode == "pyplot":
+                import matplotlib._pylab_helpers as _ph
+                import matplotlib.pyplot as plt
+
+                plt.get_backend()
+                next_num = max(plt.get_fignums(), default=0) + 1
+                _ph.Gcf._set_new_active_manager(
+                    plt._backend_mod.new_figure_manager_given_figure(next_num, fig)
+                )
+
         return fig
 
     return inner
@@ -67,5 +81,5 @@ def generate_stage3(
         )
     )
     if center_line:
-        ax.add_artist(make_artist(knot.path, lw=1, ls="--", color="k", alpha=.1))
+        ax.add_artist(make_artist(knot.path, lw=1, ls="--", color="k", alpha=0.1))
     return fig
