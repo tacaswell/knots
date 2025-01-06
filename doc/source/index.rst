@@ -6,6 +6,8 @@
 knots documentation
 ===================
 
+source https://github.com/tacaswell/knots
+
 Based on *Celtic Art: The Methods of Construction* [#book]_, which covers how to
 create Celtic-style knot work this code automates the initial steps for basic
 knots.
