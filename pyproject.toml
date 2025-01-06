@@ -27,6 +27,17 @@ gen_readme_images = "python scripts/readme_images.py"
 matplotlib = ">=3.10.0,<4"
 contourpy = ">=1.3.1,<2"
 
+[tool.pixi.feature.doc.dependencies]
+sphinx = "*"
+numpydoc = ">=1.8.0,<2"
+pydata-sphinx-theme = ">=0.16.1,<0.17"
+
+[tool.pixi.feature.doc.tasks]
+build_docs = { cmd = "make html", cwd = "doc" }
+
+[tool.pixi.environments]
+docs = ["doc"]
+
 [tool.mypy]
 files = ["src", "tests"]
 python_version = "3.12"
