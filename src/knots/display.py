@@ -39,6 +39,26 @@ def show_with_guide(
     knot: Knot,
     lw: float = 7,
 ) -> Figure:
+    """
+    Show the knot with Bezier control points.
+
+    Three things are shown:
+
+     - the complete curve in solid blue
+     - the unit cell in dashed red
+     - the bezier control points in dashed pink with markers
+
+    Parameters
+    ----------
+    knot : Knot
+        The knot to display
+    lw : float, default: 7
+        The width of the line used to draw the knot in points
+
+    Returns
+    -------
+    `matplotlib.figure.Figure`
+    """
     fig = Figure(layout="constrained")
     ax = fig.subplots()
     ax.set_xlim(*knot.xlimits)
@@ -64,8 +84,43 @@ def generate_stage3(
     width: float = 7,
     *,
     center_line: bool = False,
-    fig_size=(8.5, 11),
+    fig_size: tuple[float, float] | None = None,
+    center_alpha: float = 0.1,
 ) -> Figure:
+    """
+    Draw the "Stage 3" version of the knot ready to be interleaved.
+
+    Parameters
+    ----------
+    knot : Knot
+        The knot to render
+
+    width : float, default: 7
+        The width in points of the ribbon of the knot.
+
+    center_line : bool, default: False
+        If the center line of the knot should also be drawn.
+
+        If the knot will be traced this can be a helpful guide for correctly
+        doing the interleaving, but it can be distracting particularly if you
+        plan to directly color a print out.
+
+    fig_size : tuple, default: None
+        The size of the rendered figure in in, following `matplotlib.figure.Figure`.
+
+        If not given, get the aspect ratio from the `Knot` make the width 5in
+
+    center_alpha : float, default: 0.1
+        The alpha of the center line if it is drawn.
+
+    Returns
+    -------
+    `matplotlib.figure.Figure`
+
+    """
+    if fig_size is None:
+        aspect_ratio = float(np.diff(knot.ylimits) / np.diff(knot.xlimits))
+        fig_size = (5, 5 * aspect_ratio)
     fig = Figure(figsize=fig_size)
     ax = fig.add_axes((0, 0, 1, 1))
     ax.set_xlim(*knot.xlimits)
@@ -81,5 +136,8 @@ def generate_stage3(
         )
     )
     if center_line:
-        ax.add_artist(make_artist(knot.path, lw=1, ls="--", color="k", alpha=0.1))
+        ax.add_artist(
+            make_artist(knot.path, lw=1, ls="--", color="k", alpha=center_alpha)
+        )
+
     return fig
