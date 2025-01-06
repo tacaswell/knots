@@ -72,10 +72,8 @@ def ring1():
 
     return path_from_pts(
         [
-            (Pt(np.cos(th) * (r + dr), np.sin(th) * (r - dr)), (th - np.pi / 2) * phi)
-            for (th, dr, phi) in zip(
-                np.linspace(0, 2 * np.pi, 13), cycle([-0.4, 0.4]), cycle([1, 1])
-            )
+            (Pt(np.cos(th) * (r + dr), np.sin(th) * (r - dr)), (th - np.pi / 2))
+            for (th, dr) in zip(np.linspace(0, 2 * np.pi, 13), cycle([-0.4, 0.4]))
         ],
         scale=1,
         closed=True,
