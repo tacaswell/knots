@@ -36,6 +36,10 @@ build_docs = { cmd = "make html", cwd = "doc" }
 
 [tool.pixi.feature.interactive.dependencies]
 matplotlib = "*"
+ipython = ">=8.31.0,<9"
+
+[tool.pixi.feature.interactive.tasks]
+scratch = "python scripts/scratch.py"
 
 [tool.pixi.environments]
 doc = ["doc"]
