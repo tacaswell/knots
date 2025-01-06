@@ -4,7 +4,6 @@ description = "Helpers to draw Celtic-stlye knots."
 name = "knots"
 requires-python = ">= 3.12"
 version = "0.1.0"
-dependencies = ["mpl-gui @ git+https://github.com/matplotlib/mpl-gui"]
 
 [build-system]
 build-backend = "hatchling.build"
@@ -24,7 +23,7 @@ knots = { path = ".", editable = true }
 gen_readme_images = "python scripts/readme_images.py"
 
 [tool.pixi.dependencies]
-matplotlib = ">=3.10.0,<4"
+matplotlib-base = ">=3.10.0,<4"
 contourpy = ">=1.3.1,<2"
 
 [tool.pixi.feature.doc.dependencies]
@@ -35,8 +34,12 @@ pydata-sphinx-theme = ">=0.16.1,<0.17"
 [tool.pixi.feature.doc.tasks]
 build_docs = { cmd = "make html", cwd = "doc" }
 
+[tool.pixi.feature.interactive.dependencies]
+matplotlib = "*"
+
 [tool.pixi.environments]
 doc = ["doc"]
+interactive = ["interactive"]
 
 [tool.mypy]
 files = ["src", "tests"]
@@ -104,6 +107,9 @@ exclude = []
 
 [lint.isort]
 required-imports = []
+
+[dependency-groups]
+interactive = ["mpl-gui @ git+https://github.com/matplotlib/mpl-gui"]
 
 [tool.ruff.lint.isort.sections]
 # Group all Django imports into a separate section.

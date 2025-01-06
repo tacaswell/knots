@@ -6,8 +6,6 @@ from matplotlib.figure import Figure
 
 from knots.path import Knot, as_outline, make_artist
 
-import mpl_gui
-
 
 def _auto_display(func):
     # TODO patch the __signature__
@@ -18,6 +16,8 @@ def _auto_display(func):
         fig = func(*args, **kwargs)
         if display:
             if display_mode == "mpl-gui":
+                import mpl_gui
+
                 mpl_gui.display(fig)
             elif display_mode == "pyplot":
                 import matplotlib._pylab_helpers as _ph
