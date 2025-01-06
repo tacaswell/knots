@@ -3,9 +3,7 @@ from itertools import cycle
 import numpy as np
 from matplotlib.path import Path
 
-from knots.display import generate_stage3, show_with_guide
 from knots.path import (
-    Knot,
     Pt,
     gen_curve3,
     path_data_to_path,
@@ -45,9 +43,10 @@ def knot1():
 def band1():
     return path_from_pts(
         [
-            (Pt(x, y), angle)
-            for (x, y, angle) in zip(
-                np.arange(-2, 2, 0.1), cycle([-0.55, 0.55]), cycle([0, 0])
+            (Pt(x, y), 0)
+            for (x, y) in zip(
+                np.arange(-2, 2, 0.1),
+                cycle([-0.55, 0.55]),
             )
         ],
         scale=0.7,
@@ -101,11 +100,3 @@ def ring2():
         scale=1,
         closed=True,
     )
-
-
-# k = Knot(band1(), ylimits=(-0.6, 0.6))
-
-# k = Knot.four_fold(knot1())
-k = Knot(ring2())
-show_with_guide(k)
-fig = generate_stage3(k, center_line=True, width=7)
