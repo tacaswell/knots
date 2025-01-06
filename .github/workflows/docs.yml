@@ -37,6 +37,7 @@ jobs:
       - uses: prefix-dev/setup-pixi@v0.8.1
         with:
           environments: doc
+          pixi-version: v0.39.5
 
       # set up pages
       - name: Setup Pages
