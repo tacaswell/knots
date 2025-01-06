@@ -36,7 +36,7 @@ pydata-sphinx-theme = ">=0.16.1,<0.17"
 build_docs = { cmd = "make html", cwd = "doc" }
 
 [tool.pixi.environments]
-docs = ["doc"]
+doc = ["doc"]
 
 [tool.mypy]
 files = ["src", "tests"]
