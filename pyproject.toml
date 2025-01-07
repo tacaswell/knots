@@ -14,7 +14,7 @@ allow-direct-references = true
 
 [tool.pixi.project]
 channels = ["conda-forge"]
-platforms = ["linux-64", "osx-arm64"]
+platforms = ["linux-64", "osx-arm64", "win-64"]
 
 [tool.pixi.pypi-dependencies]
 knots = { path = ".", editable = true }
