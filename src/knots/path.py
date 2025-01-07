@@ -1,6 +1,7 @@
 from collections import namedtuple
 from collections.abc import Generator, Sequence
 from dataclasses import dataclass, field
+from itertools import cycle, pairwise
 from typing import cast
 
 import numpy as np
@@ -391,3 +392,98 @@ def as_outline(knot: Knot, width: float = 7, *, thresh=128) -> Path:
     p = Path(verts, codes)
     p.should_simplify = True
     return p
+
+
+def single_path(
+    knot: Knot,
+) -> (npt.NDArray[np.float64], npt.NDArray[np.float64]):
+    xy = []
+    for b, code in knot.path.iter_bezier():
+        if code in (Path.MOVETO, Path.CLOSEPOLY):
+            xy.append(b([0.5]))
+        else:
+            xy.append(b(np.linspace(0, 1, 2 * 4 ** int(code))))
+    pts = np.vstack(xy)
+
+    return pts, np.cumsum(np.hypot(*np.diff(pts, axis=0).T))
+
+
+def find_crossings(knot: Knot):
+    import matplotlib.pyplot as plt
+
+    import skimage.morphology
+
+    pts, _ = single_path(knot)
+    step = 0.01
+    x, y = pts.T
+    x_bins = np.arange(*knot.xlimits, step)
+    y_bins = np.arange(*knot.ylimits, step)
+    x_dig = np.digitize(x, x_bins)
+    y_dig = np.digitize(y, y_bins)
+    crossing_index = []
+    # beware of row/col vs x/y 🐲
+    hits = np.zeros((y_bins.shape[0], x_bins.shape[0]), int)
+    for j, (_y, _x) in enumerate(zip(y_dig, x_dig, strict=False)):
+        # either new voxel or in same as the previous step
+        if hits[_y, _x] == 0 or hits[_y, _x] == j - 1:
+            ...
+        # re-entering a box non-contigously, probably a crossing
+        else:
+            # recored both the index we are and the one we crossed
+            crossing_index.append(j)
+            crossing_index.append(int(hits[_y, _x]))
+        hits[_y, _x] = j
+    plt.imshow(
+        skimage.morphology.dilation(hits, np.ones((5, 5))),
+        extent=[*knot.xlimits, *knot.ylimits],
+    )
+    # the point indexes where we think there might be a crossing
+    crossing_index.sort()
+    ci_array = np.asarray(crossing_index)
+    plt.plot(*pts[crossing_index].T, "ro")
+    # get crossings that are "far apart".  In principle, we should
+    # find the center of the crossing candidates per cluster, but we are going
+    # to use this index as the center of the split so if we are off by a bit it
+    # is not a huge deal
+    xpts = pts[crossing_index]
+    delta = np.hypot(*np.diff(xpts, axis=0).T)
+    for j in range(10):
+        print(np.sum(delta > step * j))
+    ci_array = np.concat([[0], ci_array[1:][delta > step * 5]])
+    plt.plot(*pts[ci_array].T, "gx")
+    if len(ci_array) % 2 != 0:
+        raise RuntimeError("did not find an even number of crossings")
+    xpts = pts[ci_array]
+    dist = np.sum((xpts.reshape(-1, 1, 2) - xpts.reshape(1, -1, 2)) ** 2, axis=2)
+
+    pairs = []
+    # there is a "crossing" at 0 and the end, not real crossings so we will drop
+    # in the next code, but will check to verify assumptions
+    state = np.zeros(len(ci_array) - 2)
+    if np.argmin(dist[0, 1:]) + 1 != len(ci_array) - 1:
+        raise RuntimeError("start point does not align with last 'crossing'")
+    for indx_a, order in zip(range(1, len(ci_array) - 1), cycle((1, -1))):
+        row = dist[indx_a]
+
+        _id, indx_b, *_ = np.argsort(row)
+        if _id != indx_a:
+            raise RuntimeError("should be closest to ourself")
+        if state[indx_a - 1] == 0:
+            state[indx_a - 1] = order
+            state[indx_b - 1] = -order
+            pairs.append(sorted([indx_a - 1, indx_b - 1]))
+        else:
+            if state[indx_a - 1] != order:
+                raise RuntimeError("trying to re-label a crossing")
+
+    return ci_array[1:-1], pairs, state, pts
+
+
+def resegment(ci_array, pts):
+    boundaries = ci_array
+    widths = np.diff(boundaries)
+    new_boundaries = np.concatenate(
+        [[0], boundaries[:-1] + widths / 2, [len(pts) - 1]]
+    ).astype(int)
+
+    return [pts[a:b] for a, b in pairwise(new_boundaries)]

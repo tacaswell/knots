@@ -141,3 +141,67 @@ def generate_stage3(
         )
 
     return fig
+
+
+def plot_segs_diagnostic(segs):
+    "ugly but works"
+    fig, ax = plt.subplots()
+    colors = ["C0", "C1"]
+    for j, seg in enumerate(segs):
+        ax.plot(*seg.T, lw=10, zorder=1 + j % 2, color=colors[j % 2])
+
+
+def colored_line_between_pts(pts, c, **lc_kwargs):
+    """
+    Plot a line with a color specified between (x, y) points by a third value.
+
+    It does this by creating a collection of line segments between each pair of
+    neighboring points. The color of each segment is determined by the
+    made up of two straight lines each connecting the current (x, y) point to the
+    midpoints of the lines connecting the current point with its two neighbors.
+    This creates a smooth line with no gaps between the line segments.
+
+    Parameters
+    ----------
+    x, y : array-like
+        The horizontal and vertical coordinates of the data points.
+    c : array-like
+        The color values, which should have a size one less than that of x and y.
+    ax : Axes
+        Axis object on which to plot the colored line.
+    **lc_kwargs
+        Any additional arguments to pass to matplotlib.collections.LineCollection
+        constructor. This should not include the array keyword argument because
+        that is set to the color argument. If provided, it will be overridden.
+
+    Returns
+    -------
+    matplotlib.collections.LineCollection
+        The generated line collection representing the colored line.
+    """
+    if "array" in lc_kwargs:
+        raise TypeError
+
+    # Check color array size (LineCollection still works, but values are unused)
+    if len(c) != pts.shape[0] - 1:
+        raise ValueError
+    # Create a set of line segments so that we can color them individually
+    # This creates the points as an N x 1 x 2 array so that we can stack points
+    # together easily to get the segments. The segments array for line collection
+    # needs to be (numlines) x (points per line) x 2 (for x and y)
+    points = pts.reshape(-1, 1, 2)
+    segments = np.concatenate([points[:-1], points[1:]], axis=1)
+    lc = LineCollection(segments, **lc_kwargs)
+
+    # Set the values used for colormapping
+    lc.set_array(c)
+
+    return lc
+
+
+def plot_segs_multiline(segs, pts, ci_array, ax):
+    "currently busted"
+
+    for j, (seg, ci) in enumerate(zip(segs, ci_array, strict=True)):
+        cs = np.cumsum(np.hypot(*(seg - pts[ci]).T))
+        ax.add_artist(colored_line_between_pts(seg, cs[1:], lw=14, cmap="twilight"))
