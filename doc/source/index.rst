@@ -13,6 +13,10 @@ create Celtic-style knot work this code automates the initial steps for basic
 knots.
 
 
+Method
+------
+
+
 Very briefly, the method is to:
 
 1. construct a single line that is the path of the knot
@@ -67,6 +71,52 @@ over/under until you return to the starting point.
    generate_stage3(Knot.four_fold(knot1()), fig_size=(5, 5))
 
 
+Usage
+-----
+
+A minimal script to generate and display a knot is:
+
+.. literalinclude:: ../../scripts/scratch.py
+
+
+which can be run via ::
+
+   pixi run scratch
+
+Edit to something that brings you joy!
+
+Development and Contributions
+-----------------------------
+
+This project is typed and has ruff formatting and linting applied.
+
+There are no tests other than looking at the demo section of the docs.
+
+The docs can be rebuilt via ::
+
+  pixi run build_docs
+
+Contributions are welcome, particularly additional knots in ``demos.py`` (shown
+in :doc:`demos`).
+
+Dependencies
+~~~~~~~~~~~~
+
+- Matplotlib
+- contourpy (which Matplotlib also depends on, but used directly)
+- mpl-gui (technically optional)
+
+
+George Bain
+-----------
+
+To quote `the website of his collection <https://georgebain.groamhouse.org.uk>`__
+
+
+   George Bain (1881-1968) was a Scottish illustrator, watercolourist, designer
+   and art teacher whose vision and advocacy of a living, creative Celtic craft
+   provides an important and influential contribution to continued interest in
+   Celtic and Insular art.
 
 
 .. toctree::

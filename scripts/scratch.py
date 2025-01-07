@@ -20,7 +20,7 @@ def gen():
 
 
 k = Knot(gen())
-mpl_gui.display(
-    show_with_guide(k, display=False),
-    generate_stage3(k, display=False, width=15),
-)
+fig_guide = show_with_guide(k, display=False)
+fig_stage3 = (generate_stage3(k, display=False, width=15),)
+mpl_gui.display(fig_guide, fig_stage3)
+# fig_stage3.savefig('/tmp/my_knot.pdf')
