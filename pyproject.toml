@@ -58,7 +58,10 @@ disallow_incomplete_defs = false
 ignore_missing_imports = true
 
 [tool.ruff]
-lint.select = [
+src = ["src"]
+exclude = []
+[tool.ruff.lint]
+select = [
   "E", "F", "W", # flake8
   "B",           # flake8-bugbear
   "I",           # isort
@@ -82,7 +85,7 @@ lint.select = [
   "NPY",         # NumPy specific rules
   "PD",          # pandas-vet
 ]
-lint.extend-ignore = [
+extend-ignore = [
   "PLR",    # Design related pylint codes
   "E501",   # Line too long, trust the formatter to get it right
   "ISC001", # implicit concat, can be handy
@@ -97,27 +100,23 @@ lint.extend-ignore = [
   "NPY002", # allow the old numpy random generator
   "EM101",  # string literals in error messages are fine, stop power tripping
 ]
-lint.unfixable = [
+unfixable = [
   "T20",  # Removes print statements
   "F841", # Removes unused variables
 #   "F401", # Do not auto-remove unused imports (annoying to work with)
 ]
-lint.flake8-unused-arguments.ignore-variadic-names = true
 
-src = ["src"]
-exclude = []
-# Uncomment if using a _compat.typing backport
-# typing-modules = ["bad_tools._compat.typing"]
-
-[lint.isort]
-required-imports = []
-
-[dependency-groups]
-interactive = ["mpl-gui @ git+https://github.com/matplotlib/mpl-gui"]
-
-[tool.ruff.lint.isort.sections]
-# Group all Django imports into a separate section.
-"scipy" = ["matplotlib", "numpy", "scipy"]
+flake8-unused-arguments.ignore-variadic-names = true
 
 [tool.ruff.lint.isort]
 section-order = ["future", "standard-library", "scipy", "first-party", "local-folder", "third-party"]
+
+required-imports = []
+# Uncomment if using a _compat.typing backport
+# typing-modules = ["bad_tools._compat.typing"]
+
+[tool.ruff.lint.isort.sections]
+"scipy" = ["matplotlib", "numpy", "scipy"]
+
+[dependency-groups]
+interactive = ["mpl-gui @ git+https://github.com/matplotlib/mpl-gui"]
