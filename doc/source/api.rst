@@ -37,7 +37,18 @@ Display
 
 
    display.show_with_guide
+   display.make_guide
+   display.make_stage3
 
+Editor
+------
+
+
+.. autosummary::
+   :toctree: generated/
+
+   editor.KnotArtistManager
+   editor.KnotInteractor
 
 Knot transforms
 ---------------

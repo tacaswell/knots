@@ -235,7 +235,9 @@ def gen_curve4(
         exit_angle = entrance_angle
 
 
-def path_from_pts(points: Sequence[tuple[Pt, float]], scale=0.3, closed=False) -> Path:
+def path_from_pts(
+    points: Sequence[tuple[Pt, float]], scale: float = 0.3, closed: bool = False
+) -> Path:
     """
     Convert a sequence of points and entrance angles to a `~matplotlib.path.Path`
 
