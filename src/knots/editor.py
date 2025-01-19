@@ -77,6 +77,7 @@ class KnotInteractor:
         points: Sequence[tuple[Pt, float]],
         scale: float = 0.3,
         width=7,
+        reflect_func=None,
     ):
         self.ax_path, self.ax_stage3 = fig.subplots(
             1,
@@ -86,6 +87,8 @@ class KnotInteractor:
         )
         self.points = points
         self.scale = scale
+        self.reflect_func = reflect_func
+
         self.kam = KnotArtistManager(self.generate_knot(), width=width)
 
         self.kam.add_guide(self.ax_path, animated=True)
@@ -105,7 +108,13 @@ class KnotInteractor:
         return self.kam.knot
 
     def generate_knot(self):
-        return Knot(path_from_pts(self.points, self.scale, closed=True))
+        if self.reflect_func is None:
+            base_path = None
+            path = path_from_pts(self.points, self.scale, closed=True)
+        else:
+            base_path = path_from_pts(self.points, self.scale)
+            path = self.reflect_func(base_path)
+        return Knot(path, base_path)
 
     def get_ind_under_point(self, event):
         """
