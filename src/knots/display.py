@@ -46,6 +46,7 @@ def _auto_display(func):
                 _ph.Gcf._set_new_active_manager(
                     plt._backend_mod.new_figure_manager_given_figure(next_num, fig)
                 )
+                fig.canvas.manager.show()
 
         return fig
 

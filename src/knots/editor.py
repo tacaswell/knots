@@ -1,11 +1,12 @@
 from collections.abc import Sequence
+from pprint import pprint
 
 import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.backend_bases import MouseButton
 from matplotlib.figure import Figure
 
-from knots.display import make_guide, make_stage3
+from knots.display import generate_stage3, make_guide, make_stage3
 from knots.path import Knot, Pt, as_outline, path_from_pts
 
 
@@ -154,14 +155,20 @@ class KnotInteractor:
 
     def on_key_press(self, event):
         """Callback for key presses."""
-        if not event.inaxes:
-            return
-        if event.key == "t":
-            self.showverts = not self.showverts
-            self.line.set_visible(self.showverts)
-            if not self.showverts:
-                self._ind = None
-        self.canvas.draw()
+
+        if event.key == "R":
+            generate_stage3(self.knot, self.kam.width, center_line=True)
+        elif event.key == "P":
+            pprint(
+                {
+                    "width": self.kam.width,
+                    "scale": self.scale,
+                    "points": self.points,
+                    "reflect_func": f"{self.reflect_func.__module__}.{self.reflect_func.__name__}"
+                    if self.reflect_func is not None
+                    else None,
+                }
+            )
 
     def on_mouse_move(self, event):
         """Callback for mouse movements."""

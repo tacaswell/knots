@@ -40,7 +40,7 @@ ipython = ">=8.31.0,<9"
 
 [tool.pixi.feature.interactive.tasks]
 scratch = "python scripts/scratch.py"
-editor = "python scripts/editor.py"
+editor = {cmd = "python scripts/editor.py", env = {KNOT_WINDOW_MODE ='pyplot'} }
 
 [tool.pixi.environments]
 doc = ["doc"]

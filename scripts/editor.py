@@ -5,7 +5,7 @@ from knots.editor import KnotInteractor
 from knots.path import Pt, four_fold
 
 fig = plt.figure()
-
+fig.suptitle("'R' to render template, 'P' to print state")
 
 interactor = KnotInteractor(
     fig,
