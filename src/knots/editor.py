@@ -5,9 +5,65 @@ import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.backend_bases import MouseButton
 from matplotlib.figure import Figure
+from matplotlib.widgets import RangeSlider, Slider
 
 from knots.display import generate_stage3, make_guide, make_stage3
 from knots.path import Knot, Pt, as_outline, path_from_pts
+
+
+class ReleaseSlider(Slider):
+    def on_release(self, func):
+        """
+        Connect *func* as callback function to changes of the slider value.
+
+        Parameters
+        ----------
+        func : callable
+            Function to call when slider is changed.
+            The function must accept a single float as its arguments.
+
+        Returns
+        -------
+        int
+            Connection id (which can be used to disconnect *func*).
+        """
+        return self._observers.connect("released", lambda: func())
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # very bad from, mutating private state on private state!
+        self._observers._signals.append("released")
+
+    def _update(self, event):
+        """Update the slider position."""
+        if self.ignore(event) or event.button != 1:
+            return
+
+        if event.name == "button_press_event" and self.ax.contains(event)[0]:
+            self.drag_active = True
+            event.canvas.grab_mouse(self.ax)
+
+        if not self.drag_active:
+            return
+
+        if (
+            event.name == "button_release_event"
+            or event.name == "button_press_event"
+            and not self.ax.contains(event)[0]
+        ):
+            self.drag_active = False
+            event.canvas.release_mouse(self.ax)
+            if self.eventson:
+                self._observers.process("released")
+
+            return
+
+        xdata, ydata = self._get_data_coords(event)
+        val = self._value_in_bounds(
+            xdata if self.orientation == "horizontal" else ydata
+        )
+        if val not in [None, self.val]:
+            self.set_val(val)
 
 
 class KnotArtistManager:
@@ -80,13 +136,17 @@ class KnotInteractor:
         width=7,
         reflect_func=None,
     ):
-        self.ax_path, self.ax_stage3 = fig.subplots(
+        sfa, sfc = fig.subfigures(2, height_ratios=(5, 2))
+        fig.set_layout_engine("constrained")
+        c_axes = sfc.subplot_mosaic("ii;aa;ss;ww;xy")
+
+        self.ax_path, self.ax_stage3 = sfa.subplots(
             1,
             2,
             sharex=True,
             sharey=True,
         )
-        self.points = points
+        self.points = [p if len(p) == 3 else (*p, scale) for p in points]
         self.scale = scale
         self.reflect_func = reflect_func
 
@@ -96,6 +156,40 @@ class KnotInteractor:
         self.kam.add_stage3(self.ax_stage3)
 
         self._ind = None  # the active vertex
+        self._slider_ind = 0  # the active vertex
+
+        self.widgets = {}
+        self.widgets["w"] = Slider(c_axes["w"], "width", 1, 25, valinit=width)
+        self.widgets["i"] = ReleaseSlider(
+            c_axes["i"],
+            "point index",
+            0,
+            len(points) - 1,
+            valstep=1,
+            initcolor="none",
+            valinit=0,
+        )
+        self.widgets["a"] = ReleaseSlider(
+            c_axes["a"], "angle", -1, 1, valfmt=r"%.3f $\pi$", initcolor="none"
+        )
+        self.widgets["s"] = ReleaseSlider(c_axes["s"], "scale", 0, 3, initcolor="none")
+        self.widgets["x"] = RangeSlider(c_axes["x"], "xlimits", -2, 2, valfmt="%.2f")
+        self.widgets["y"] = RangeSlider(c_axes["y"], "ylimits", -2, 2, valfmt="%.2f")
+
+        # prompt updates
+        self.widgets["i"].on_changed(self._index_change)
+        self.widgets["s"].on_changed(self._scale_change)
+        self.widgets["a"].on_changed(self._angle_change)
+
+        # delayed updates
+        self.widgets["i"].on_release(self.kam.update_satge3)
+        self.widgets["s"].on_release(self.kam.update_satge3)
+        self.widgets["a"].on_release(self.kam.update_satge3)
+
+        self.widgets["w"].on_changed(lambda val: setattr(self.kam, "width", val))
+
+        self._index_change(self._slider_ind)
+
         canvas = fig.canvas
         canvas.mpl_connect("draw_event", self.on_draw)
         canvas.mpl_connect("button_press_event", self.on_button_press)
@@ -103,6 +197,31 @@ class KnotInteractor:
         canvas.mpl_connect("button_release_event", self.on_button_release)
         canvas.mpl_connect("motion_notify_event", self.on_mouse_move)
         self.canvas = canvas
+
+    def _index_change(self, val):
+        self._slider_ind = int(val)
+        vert = self.points[self._slider_ind]
+        _, angle, scale = vert
+        angle /= np.pi
+        try:
+            for k in ["a", "s"]:
+                self.widgets[k].eventson = False
+            self.widgets["a"].set_val(angle)
+            self.widgets["s"].set_val(scale)
+
+        finally:
+            for k in ["a", "s"]:
+                self.widgets[k].eventson = True
+
+    def _scale_change(self, val):
+        vert = self.points[self._slider_ind]
+        self.points[self._slider_ind] = (*vert[:2], val)
+        self.kam.update(knot=self.generate_knot())
+
+    def _angle_change(self, val):
+        vert = self.points[self._slider_ind]
+        self.points[self._slider_ind] = (vert[0], val * np.pi, vert[-1])
+        self.kam.update(knot=self.generate_knot())
 
     @property
     def knot(self) -> Knot:
@@ -144,7 +263,9 @@ class KnotInteractor:
             or not self.showverts
         ):
             return
-        self._ind = self.get_ind_under_point(event)
+        self._ind = ind = self.get_ind_under_point(event)
+        if ind is not None:
+            self.widgets["i"].set_val(self._ind)
 
     def on_button_release(self, event):
         """Callback for mouse button releases."""
@@ -182,7 +303,7 @@ class KnotInteractor:
 
         self.points[self._ind] = (
             Pt(event.xdata, event.ydata),
-            self.points[self._ind][1],
+            *self.points[self._ind][1:],
         )
 
         self.kam.update(knot=self.generate_knot())

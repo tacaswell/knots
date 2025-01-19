@@ -158,7 +158,9 @@ def gen_curve3(
 
 def gen_curve4(
     start_point: Pt, exit_angle: float, scale: float = 0.15
-) -> Generator[list[tuple[np.uint8, Pt]], tuple[Pt, float], None]:
+) -> Generator[
+    list[tuple[np.uint8, Pt]], tuple[Pt, float] | tuple[Pt, float, float], None
+]:
     """
     A helper to generate a sequence of quadratic Bezier segments.
 
@@ -204,7 +206,9 @@ def gen_curve4(
 
     """
     last_point = start_point
-    next_point, entrance_angle = yield []
+    next_point, entrance_angle, *rest = yield []
+    if len(rest):
+        (scale,) = rest
     dist = np.hypot(next_point.x - last_point.x, next_point.y - last_point.y)
     c1 = Pt(
         last_point.x + dist * scale * np.cos(exit_angle),
@@ -217,11 +221,13 @@ def gen_curve4(
     exit_angle = entrance_angle
     last_point = next_point
     while True:
-        next_point, entrance_angle = yield [
+        next_point, entrance_angle, *rest = yield [
             (Path.CURVE4, c1),
             (Path.CURVE4, c2),
             (Path.CURVE4, next_point),
         ]
+        if len(rest):
+            (scale,) = rest
         dist = np.hypot(next_point.x - last_point.x, next_point.y - last_point.y)
         c1 = Pt(
             last_point.x + dist * scale * np.cos(exit_angle),
@@ -266,7 +272,9 @@ def path_from_pts(
 
     """
     itr = iter(points)
-    start_point, start_angle = next(itr)
+    start_point, start_angle, *rest = next(itr)
+    if len(rest):
+        (scale,) = rest
     path_data = [(Path.MOVETO, start_point)]
     gen = gen_curve4(path_data[-1][1], start_angle, scale=scale)
     # mypy is complaining about the initial send being None

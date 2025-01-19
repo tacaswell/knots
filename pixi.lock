@@ -1916,7 +1916,7 @@ packages:
 - pypi: .
   name: knots
   version: 0.1.0
-  sha256: e7b34f1ea7275a958190eb018608527bf932dd84f9d0847b7d43324780488815
+  sha256: 7a7b4f68609bb7d978d31e56b10ce71d821480b74b15255e3b719316b5c8c44d
   requires_python: '>=3.12'
   editable: true
 - conda: https://conda.anaconda.org/conda-forge/linux-64/krb5-1.21.3-h659f571_0.conda
