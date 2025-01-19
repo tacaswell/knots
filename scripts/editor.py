@@ -16,7 +16,7 @@ interactor = KnotInteractor(
         (Pt(0.75, 0.0), -np.pi / 2),
     ],
     scale=0.5,
-    width=15,
+    width=10,
 )
 
 plt.show()

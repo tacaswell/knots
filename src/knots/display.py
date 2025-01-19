@@ -90,7 +90,7 @@ def make_guide(
         base_path = knot.base_path
     else:
         base_path = knot.path
-    knot_base_art = make_artist(base_path, color="r", lw=lw / 2, zorder=2, ls="--")
+    knot_base_art = make_artist(base_path, color="r", lw=lw / 3, zorder=2, ls="--")
 
     control_line = Line2D(
         *np.asarray(base_path.vertices).T, linestyle="--", marker="s", color="pink"
