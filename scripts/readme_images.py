@@ -15,16 +15,16 @@ def path1() -> list[tuple[np.uint8, Pt]]:
     path_data = [
         (Path.MOVETO, Pt(0, 0.8)),
     ]
-    gen = gen_curve4(path_data[-1][1], np.pi, scale=0.3)
+    gen = gen_curve4(path_data[-1][1], np.rad2deg(np.pi), scale=0.3)
     gen.send(None)
     for pt in [
-        (Pt(-0.7, 0.15), -np.pi / 10),
+        (Pt(-0.7, 0.15), np.rad2deg(-np.pi / 10)),
         (Pt(-0.7, 0.7), 0),
-        (Pt(0.5, -0.75), -np.pi / 2),
+        (Pt(0.5, -0.75), np.rad2deg(-np.pi / 2)),
     ]:
         path_data.extend(gen.send(pt))
 
-    path_data.extend(gen.send((Pt(-0.8, 0), -np.pi / 2)))
+    path_data.extend(gen.send((Pt(-0.8, 0), np.rad2deg(-np.pi / 2))))
     return path_data
 
 

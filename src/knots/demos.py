@@ -31,11 +31,11 @@ def path0():
 def knot1():
     return path_from_pts(
         [
-            (Pt(0, 0.8), np.pi),
-            (Pt(-0.7, 0.15), -np.pi / 10),
+            (Pt(0, 0.8), np.rad2deg(np.pi)),
+            (Pt(-0.7, 0.15), np.rad2deg(-np.pi / 10)),
             (Pt(-0.7, 0.7), 0),
-            (Pt(0.5, -0.75), -np.pi / 2),
-            (Pt(-0.8, 0), -np.pi / 2),
+            (Pt(0.5, -0.75), np.rad2deg(-np.pi / 2)),
+            (Pt(-0.8, 0), np.rad2deg(-np.pi / 2)),
         ],
     )
 
@@ -57,9 +57,11 @@ def band1():
 def band2():
     return path_from_pts(
         [
-            (Pt(x, y), angle)
+            (Pt(x, y), np.rad2deg(angle))
             for (x, y, angle) in zip(
-                np.arange(-2, 2, 0.2), cycle([-0.55, 0.55]), cycle([0, np.pi])
+                np.arange(-2, 2, 0.2),
+                cycle([-0.55, 0.55]),
+                cycle([0, np.pi]),
             )
         ],
         scale=0.7,
@@ -72,7 +74,10 @@ def ring1():
 
     return path_from_pts(
         [
-            (Pt(np.cos(th) * (r + dr), np.sin(th) * (r - dr)), (th - np.pi / 2))
+            (
+                Pt(np.cos(th) * (r + dr), np.sin(th) * (r - dr)),
+                np.rad2deg(th - np.pi / 2),
+            )
             for (th, dr) in zip(np.linspace(0, 2 * np.pi, 13), cycle([-0.4, 0.4]))
         ],
         scale=1,
@@ -87,7 +92,7 @@ def ring2():
         [
             (
                 Pt(np.cos(th) * (r + dr), np.sin(th) * (r + dr)),
-                th + phi,
+                np.rad2deg(th + phi),
             )
             for (th, dr, phi) in zip(
                 np.linspace(0, 2 * np.pi, 13),

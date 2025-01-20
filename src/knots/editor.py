@@ -170,7 +170,7 @@ class KnotInteractor:
             valinit=0,
         )
         self.widgets["a"] = ReleaseSlider(
-            c_axes["a"], "angle", -1, 1, valfmt=r"%.3f $\pi$", initcolor="none"
+            c_axes["a"], "angle", -180, 180, valfmt=r"%.1f°", initcolor="none"
         )
         self.widgets["s"] = ReleaseSlider(c_axes["s"], "scale", 0, 3, initcolor="none")
         self.widgets["x"] = RangeSlider(c_axes["x"], "xlimits", -2, 2, valfmt="%.2f")
@@ -202,7 +202,6 @@ class KnotInteractor:
         self._slider_ind = int(val)
         vert = self.points[self._slider_ind]
         _, angle, scale = vert
-        angle /= np.pi
         try:
             for k in ["a", "s"]:
                 self.widgets[k].eventson = False
@@ -220,7 +219,7 @@ class KnotInteractor:
 
     def _angle_change(self, val):
         vert = self.points[self._slider_ind]
-        self.points[self._slider_ind] = (vert[0], val * np.pi, vert[-1])
+        self.points[self._slider_ind] = (vert[0], val, vert[-1])
         self.kam.update(knot=self.generate_knot())
 
     @property

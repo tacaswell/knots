@@ -167,7 +167,7 @@ def gen_curve4(
     The constraint imposed is that the tangent out of the start of
     a segment matches the tangent in from the previous.
 
-    All angles are in radians relative to the horizontal axis.
+    All angles are in degrees relative to the horizontal axis.
 
     The first yield will be an empty list.
 
@@ -181,7 +181,7 @@ def gen_curve4(
         The location of the first point of the first segment
 
     exit_angle : float
-        The angle the path should exit the first point in radians
+        The angle the path should exit the first point in degrees
 
     scale : float, default: 0.15
         This controls how "loopy" the path is.  Smaller numbers
@@ -201,12 +201,14 @@ def gen_curve4(
         The end of the next segment to be generated.
 
     entrance_angle : float
-        The angle in radians relative to the horizonatal axis the segment should
+        The angle in degrees relative to the horizonatal axis the segment should
         approach the **end_point** from.
 
     """
+    exit_angle = np.deg2rad(exit_angle)
     last_point = start_point
     next_point, entrance_angle, *rest = yield []
+    entrance_angle = np.deg2rad(entrance_angle)
     if len(rest):
         (scale,) = rest
     dist = np.hypot(next_point.x - last_point.x, next_point.y - last_point.y)
@@ -226,6 +228,7 @@ def gen_curve4(
             (Path.CURVE4, c2),
             (Path.CURVE4, next_point),
         ]
+        entrance_angle = np.deg2rad(entrance_angle)
         if len(rest):
             (scale,) = rest
         dist = np.hypot(next_point.x - last_point.x, next_point.y - last_point.y)
