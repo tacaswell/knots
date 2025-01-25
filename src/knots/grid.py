@@ -94,7 +94,8 @@ def walk_to_pts(walk_out):
         print("***")
         print(Pt(*b), angle, max(scale, last_scale))
         print("***")
-        yield Pt(*b), angle, max(scale, last_scale)
+        if scale != 0:
+            yield Pt(*b), angle, max(scale, last_scale)
         last_scale = scale
         a = b
         b = c
