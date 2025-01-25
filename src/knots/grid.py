@@ -25,7 +25,6 @@ def walk_grid(grid, start):
     out = []
     segments = set()
     while True:
-        print(next_step)
         out.append(next_step)
         last_point = next_step
         # handle hitting wall
@@ -78,12 +77,9 @@ def walk_to_pts(walk_out):
     yield Pt(*a), 0, 0.3
     last_scale = 0.3
     for c in source:
-        print(a, b, c)
-        print((c.row - a.row), (c.col - a.col))
         d1 = ((b.row - a.row), (b.col - a.col))
         d2 = ((c.row - b.row), (c.col - b.col))
         d3 = ((c.row - a.row), (c.col - a.col))
-        print(d1, d2, d3)
         if d1 == d2:
             scale = 0
             angle = np.rad2deg(np.arctan2(*d1))
@@ -91,9 +87,6 @@ def walk_to_pts(walk_out):
             scale = 0.3
             angle = np.rad2deg(np.arctan2(*d3))
 
-        print("***")
-        print(Pt(*b), angle, max(scale, last_scale))
-        print("***")
         if scale != 0:
             yield Pt(*b), angle, max(scale, last_scale)
         last_scale = scale
