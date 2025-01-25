@@ -10,9 +10,9 @@ def gen():
     return path_from_pts(
         [
             (Pt(0, 0.5), 0),
-            (Pt(-0.5, 0.0), np.pi / 2),
-            (Pt(0, -0.50), np.pi),
-            (Pt(0.5, 0.0), -np.pi / 2),
+            (Pt(-0.5, 0.0), np.rad2deg(np.pi / 2)),
+            (Pt(0, -0.50), np.rad2deg(np.pi)),
+            (Pt(0.5, 0.0), np.rad2deg(-np.pi / 2)),
         ],
         scale=0.5,
         closed=True,
