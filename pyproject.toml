@@ -25,6 +25,7 @@ gen_readme_images = "python scripts/readme_images.py"
 [tool.pixi.dependencies]
 matplotlib-base = ">=3.10.0,<4"
 contourpy = ">=1.3.1,<2"
+scipy = ">=1.15.1,<2"
 
 [tool.pixi.feature.doc.dependencies]
 sphinx = "*"
