@@ -56,19 +56,23 @@ class Knot:
         Generate a 4-fold symetric `Knot` from a `~matplotlib.path.Path`
         """
         path = four_fold(base_path)
-        return cls(path, base_path, **kwargs)
+        bounds = guess_bounds(path)
+
+        return cls(
+            path,
+            base_path,
+            **{"xlimits": bounds.xlimits, "ylimits": bounds.ylimits, **kwargs},
+        )
 
     @classmethod
     def as_spline(cls, points, pix_err=0.2, **kwargs):
         sc = SplineCurve.from_pts(points, pix_err=pix_err, need_sort=False)
         verts = sc.q_phi_to_xy(0, np.linspace(0, 2 * np.pi, 1024)).T
-        x_pad, y_pad = np.ptp(verts, axis=0) * 0.05
-        x_min, y_min = np.min(verts, axis=0)
-        x_max, y_max = np.max(verts, axis=0)
+        path = Path(verts, closed=True)
+        bounds = guess_bounds(path)
         return cls(
-            Path(verts, closed=True),
-            xlimits=(x_min - x_pad, x_max + x_pad),
-            ylimits=(y_min - y_pad, y_max + y_pad),
+            path,
+            **{"xlimits": bounds.xlimits, "ylimits": bounds.ylimits},
         )
 
 
