@@ -19,7 +19,7 @@ def gen():
     )
 
 
-k = Knot(gen())
+k = Knot.from_path(gen())
 fig_guide = show_with_guide(k, display=False)
 fig_stage3 = generate_stage3(k, display=False, width=15)
 mpl_gui.display(fig_guide, fig_stage3)

@@ -75,6 +75,13 @@ class Knot:
             **{"xlimits": bounds.xlimits, "ylimits": bounds.ylimits},
         )
 
+    @classmethod
+    def from_path(cls, path: Path, **kwargs):
+        bounds = guess_bounds(path)
+        return cls(
+            path, **{"xlimits": bounds.xlimits, "ylimits": bounds.ylimits, **kwargs}
+        )
+
 
 def join(*paths: Path, close: bool = False) -> Path:
     """
