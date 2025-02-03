@@ -1,21 +1,28 @@
 import matplotlib.pyplot as plt
+import numpy as np
 
 from knots.editor import KnotInteractor
-from knots.path import Pt, four_fold
+from knots.grid import generate_grid, walk_grid, walk_to_pts
+
+grid = generate_grid(3, 5)
+grid[2, 1] = -8
+grid[2, 7] = -8
+grid[3, 4] = -4
+# grid[3, 2] = -4
+# grid[4, 1] = -4
+
+plt.imshow(grid, origin="lower")
+out = walk_grid(grid, (0, 1))
+col, row = np.array(out).T
+plt.plot(col, row)
+plt.show()
 
 fig = plt.figure()
 fig.suptitle("'R' to render template, 'P' to print state")
 
 interactor = KnotInteractor(
     fig,
-    [
-        (Pt(x=0.0, y=0.9), 180, 0.28),
-        (Pt(x=-0.7, y=0.15), -18, 0.21),
-        (Pt(x=-0.7, y=0.75), 4, 0.5),
-        (Pt(x=0.3, y=-0.9), -180, 0.33),
-        (Pt(x=-0.8, y=0), -90, 0.3),
-    ],
-    reflect_func=four_fold,
+    list(walk_to_pts(walk_grid(grid, (0, 1)))),
     width=7,
 )
 
