@@ -18,9 +18,19 @@ from contourpy import LineType, contour_generator
 Pt = namedtuple("Pt", "x y")
 Pt.__doc__ = "namedtuple for (x, y) coordinates."
 
+Bounds = namedtuple("Bounds", "xlimits ylimits")
+
 
 def make_artist(path: Path, *, color, **kwargs):
     return PathPatch(path, facecolor="none", edgecolor=color, **kwargs)
+
+
+def guess_bounds(path: Path, scale=1.1) -> Bounds:
+    extents = path.get_extents().expanded(scale, scale)
+    return Bounds(
+        tuple(extents.intervalx),
+        tuple(extents.intervaly),
+    )
 
 
 @dataclass

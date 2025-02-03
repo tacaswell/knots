@@ -8,7 +8,7 @@ from matplotlib.figure import Figure
 from matplotlib.widgets import RangeSlider, Slider
 
 from knots.display import generate_stage3, make_guide, make_stage3
-from knots.path import Knot, Pt, as_outline, path_from_pts
+from knots.path import Knot, Pt, as_outline, guess_bounds, path_from_pts
 
 
 class ReleaseSlider(Slider):
@@ -233,7 +233,8 @@ class KnotInteractor:
         else:
             base_path = path_from_pts(self.points, self.scale)
             path = self.reflect_func(base_path)
-        return Knot(path, base_path)
+        bounds = guess_bounds(path, 1.1)
+        return Knot(path, base_path, xlimits=bounds.xlimits, ylimits=bounds.ylimits)
 
     def get_ind_under_point(self, event):
         """
