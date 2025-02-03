@@ -10,6 +10,7 @@ from matplotlib.figure import Figure
 from matplotlib.patches import PathPatch
 from matplotlib.path import Path
 
+from knots.spline import SplineCurve
 from knots.transforms import KnotTransform
 
 from contourpy import LineType, contour_generator
@@ -46,6 +47,19 @@ class Knot:
         """
         path = four_fold(base_path)
         return cls(path, base_path, **kwargs)
+
+    @classmethod
+    def as_spline(cls, points, pix_err=0.2, **kwargs):
+        sc = SplineCurve.from_pts(points, pix_err=pix_err, need_sort=False)
+        verts = sc.q_phi_to_xy(0, np.linspace(0, 2 * np.pi, 1024)).T
+        x_pad, y_pad = np.ptp(verts, axis=0) * 0.05
+        x_min, y_min = np.min(verts, axis=0)
+        x_max, y_max = np.max(verts, axis=0)
+        return cls(
+            Path(verts, closed=True),
+            xlimits=(x_min - x_pad, x_max + x_pad),
+            ylimits=(y_min - y_pad, y_max + y_pad),
+        )
 
 
 def join(*paths: Path, close: bool = False) -> Path:
